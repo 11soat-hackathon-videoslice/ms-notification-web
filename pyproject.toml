@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vdsc-notification-web"
+version = "1.0.0"
+description = "Microserviço responsável por persistir notificações para portal web"
+authors = [
+    { name="Tito Parizotto", email="titoparizotto@gmail.com" }
+]
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+dependencies = [
+    "requests>=2.25.0",
+    "requests-aws4auth>=0.9.0",
+    "boto3>=1.20.0",
+    "opencv-python-headless==4.10.0.84",
+    "Pillow==10.4.0",
+    "numpy==1.26.4",
+    "pytest",
+    "pytest-cov",
+    "pytest-mock"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/11soat-hackton-videoslice/ms-notification-web"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "unit: marca testes unitários"
+]
