@@ -341,7 +341,8 @@ class TestAppSyncNotificationWeb:
         call_args = mock_post.call_args
         assert call_args[0][0] or call_args[1].get('url')  # URL é passada
         assert call_args[1]['headers']['Content-Type'] == 'application/json'
-        assert call_args[1]['verify'] is False
+        # verify não é passado explicitamente, então usa o padrão (True)
+        assert 'verify' not in call_args[1]
 
     def test_set_mutation_variables_handles_single_content_object(self, appsync_repository):
         """Testa que variáveis são criadas corretamente quando content não é lista"""
