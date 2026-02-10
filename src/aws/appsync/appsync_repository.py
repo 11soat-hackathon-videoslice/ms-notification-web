@@ -48,6 +48,12 @@ class AppSyncNotificationWeb(NotificationDatasourceInterface):
                     createNotification(input: $input) {
                     id
                     userId
+                    timestamp
+                    message
+                    isRead
+                    videoId
+                    fileName
+                    extentisonFile
                 }
             }
         """
