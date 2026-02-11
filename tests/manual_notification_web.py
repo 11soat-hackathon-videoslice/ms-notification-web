@@ -1,7 +1,10 @@
+from datetime import datetime, timezone
 import sys
 import os
 import json
+import uuid
 from pathlib import Path
+from uuid import UUID
 
 # Adicionar path para o diretório src do ms-video-slice
 src_path = Path(__file__).parent.parent / "src"
@@ -28,12 +31,19 @@ def notificacao_web_local():
     # Simular contexto Lambda (pode ser None ou um objeto mock)
     context = None
 
+    new_id = str(uuid.uuid4().hex)
+    new_timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+
+    event['Records'][0]['body'] = event['Records'][0]['body'].replace('###ID###', new_id)
+    event['Records'][0]['body'] = event['Records'][0]['body'].replace('###TIMESTAMP###', new_timestamp)
+
     # Chamar o handler com o evento
     print(f"\n{'='*60}")
     print("Iniciando processamento do da notificação web...")
     print(f"{'='*60}\n")
 
     try:
+
         result = lambda_handler(event, context)
         print(f"\n{'='*60}")
         print("Processamento finalizado com sucesso!")
