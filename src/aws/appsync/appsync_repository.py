@@ -34,7 +34,7 @@ class AppSyncNotificationWeb(NotificationDatasourceInterface):
                 json={'query': mutation, 'variables': variables},
                 headers={'Content-Type': 'application/json'},
                 auth=auth
-                ,verify=False #Somente para testes locais, remover em produção para garantir segurança
+                #,verify=False #Somente para testes locais, remover em produção para garantir segurança
             )
             response.raise_for_status()
             logger.info(f"Notificação web criada com sucesso: {response}")
