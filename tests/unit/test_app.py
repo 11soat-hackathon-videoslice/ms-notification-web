@@ -1,3 +1,8 @@
+import warnings
+
+# Suprimir warnings nos testes
+warnings.filterwarnings("ignore")
+
 import pytest
 import json
 from unittest.mock import Mock, patch
@@ -27,7 +32,6 @@ class TestLambdaHandler:
                                 "web": {
                                     "message": "Test message",
                                     "timestamp": "2026-02-09T10:00:00Z",
-                                    "is_read": False,
                                     "user_id": "test-user-id"
                                 }
                             }],
@@ -35,17 +39,18 @@ class TestLambdaHandler:
                                 "userId": "test-user-id",
                                 "videoId": "test-video-id",
                                 "fileName": "test.mp4",
-                                "extension_file": "mp4",
+                                "fileExtension": "mp4",
                                 "status": "uploaded",
                                 "created": "2026-02-09T10:00:00Z",
                                 "totalTime": 10,
                                 "unitTime": "s",
                                 "startTime": 0,
                                 "endTime": 10,
-                                "timeInterval": ["0", "1", "2"],
-                                "maxRetry": 3,
+                                "intervalTime": ["0", "1", "2"],
+                                "maxRetries": 3,
                                 "retries": 0,
-                                "quality": "medium",
+                                "resize": "medium",
+                                "qualityOutputLevel": 50,
                                 "logs": []
                             }
                         }
@@ -64,28 +69,29 @@ class TestLambdaHandler:
                     "body": json.dumps({
                         "detail": {
                             "id": "test-notification-id",
-                            "channels": ["EMAIL"],  # Sem canal web
+                            "channels": ["EMAIL"],
                             "content": [{
                                 "email": {
                                     "template": "UPDATE_STATUS",
-                                    "user_id": "test-user-id"
+                                    "user_id": "test-user"
                                 }
                             }],
                             "metadata": {
-                                "userId": "test-user-id",
+                                "userId": "test-user",
                                 "videoId": "test-video-id",
                                 "fileName": "test.mp4",
-                                "extension_file": "mp4",
+                                "fileExtension": "mp4",
                                 "status": "uploaded",
                                 "created": "2026-02-09T10:00:00Z",
                                 "totalTime": 10,
                                 "unitTime": "s",
                                 "startTime": 0,
                                 "endTime": 10,
-                                "timeInterval": ["0", "1"],
-                                "maxRetry": 3,
+                                "intervalTime": ["0"],
+                                "maxRetries": 3,
                                 "retries": 0,
-                                "quality": "medium",
+                                "resize": "medium",
+                                "qualityOutputLevel": 50,
                                 "logs": []
                             }
                         }
@@ -129,18 +135,14 @@ class TestLambdaHandler:
 
     @patch('src.app.controller')
     @patch('src.app.logger')
-    def test_lambda_handler_invalid_notification(self, mock_logger, mock_controller, invalid_sqs_event):
+    def test_lambda_handler_invalid_notification(self, mock_controller, mock_logger, invalid_sqs_event):
         """Testa processamento de notificação inválida"""
         # Arrange
         mock_controller.send = Mock()
 
-        # Act
-        result = lambda_handler(invalid_sqs_event, None)
-
-        # Assert
-        assert result['statusCode'] == 500
-        assert "error" in result['body']
-        mock_logger.error.assert_called()
+        # Act & Assert
+        with pytest.raises(ValueError):
+            lambda_handler(invalid_sqs_event, None)
 
     @patch('src.app.controller')
     def test_lambda_handler_multiple_records(self, mock_controller, valid_sqs_event):
@@ -170,12 +172,9 @@ class TestLambdaHandler:
             ]
         }
 
-        # Act
-        result = lambda_handler(event, None)
-
-        # Assert
-        assert result['statusCode'] == 500
-        assert "error" in result['body']
+        # Act & Assert
+        with pytest.raises(json.decoder.JSONDecodeError):
+            lambda_handler(event, None)
 
     @patch('src.app.controller')
     @patch('src.app.logger')
@@ -189,7 +188,6 @@ class TestLambdaHandler:
                 web=WebPayloadDto(
                     message="Test message",
                     timestamp=datetime(2026, 2, 9, 10, 0, 0),
-                    is_read=False,
                     user_id="test-user-id"
                 )
             )],
@@ -197,17 +195,18 @@ class TestLambdaHandler:
                 user_id="test-user-id",
                 video_id="test-video-id",
                 file_name="test.mp4",
-                extension_file="mp4",
+                file_extension="mp4",
                 status="uploaded",
                 created="2026-02-09T10:00:00Z",
                 total_time=10,
                 unit_time="s",
                 start_time=0,
                 end_time=10,
-                time_interval=["0", "1", "2"],
-                max_retry=3,
+                interval_time=["0", "1", "2"],
+                max_retries=3,
                 retries=0,
-                quality="medium",
+                resize="medium",
+                quality_output_level=60,
                 logs=[]
             )
         )
@@ -269,16 +268,13 @@ class TestLambdaHandler:
             ]
         }
 
-        # Act
-        result = lambda_handler(event, None)
-
-        # Assert
-        assert result['statusCode'] == 500
-        assert "error" in result['body']
+        # Act & Assert
+        with pytest.raises(KeyError):
+            lambda_handler(event, None)
 
     @patch('src.app.controller')
     def test_lambda_handler_notification_without_web_content(self, mock_controller):
-        """Testa notificação sem conteúdo web"""
+        """Testa notificação com canal WEB mas sem conteúdo web"""
         # Arrange
         event = {
             "Records": [
@@ -287,15 +283,30 @@ class TestLambdaHandler:
                     "body": json.dumps({
                         "detail": {
                             "id": "test-id",
-                            "channels": ["email"],
+                            "channels": ["WEB"],
                             "content": [{
                                 "email": {
-                                    "template": "test",
+                                    "template": "UPDATE_STATUS",
                                     "user_id": "test-user"
                                 }
                             }],
                             "metadata": {
-                                "user_id": "test-user"
+                                "userId": "test-user",
+                                "videoId": "test-video-id",
+                                "fileName": "test.mp4",
+                                "fileExtension": "mp4",
+                                "status": "uploaded",
+                                "created": "2026-02-09T10:00:00Z",
+                                "totalTime": 10,
+                                "unitTime": "s",
+                                "startTime": 0,
+                                "endTime": 10,
+                                "intervalTime": ["0"],
+                                "maxRetries": 3,
+                                "retries": 0,
+                                "resize": "medium",
+                                "qualityOutputLevel": 50,
+                                "logs": []
                             }
                         }
                     })
@@ -303,9 +314,6 @@ class TestLambdaHandler:
             ]
         }
 
-        # Act
-        result = lambda_handler(event, None)
-
-        # Assert
-        assert result['statusCode'] == 500
-
+        # Act & Assert
+        with pytest.raises(ValueError):
+            lambda_handler(event, None)

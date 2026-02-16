@@ -1,9 +1,11 @@
-import json, logging
+import json
+import logging
 from typing import Dict, Any
 
+from core.adapters.notification.notification_controller import NotificationController
 from core.dtos import NotificationDto
 from core.enums import NotificationChannelsEnum
-from core.adapters.notification.notification_controller import NotificationController
+
 from aws.appsync.appsync_repository import AppSyncNotificationWeb
 
 logging.basicConfig(level=logging.INFO)
@@ -36,7 +38,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 
         except Exception as e:
             logger.error(f"Erro ao processar notificação: {e}", exc_info=True)
-            return {'statusCode': 500, 'body': json.dumps({"error": str(e)})}
+            raise e
 
     return {'statusCode': 202, 'body': json.dumps({"status": f"Recebido {len(records)} evento(s) para processamento."})}
 

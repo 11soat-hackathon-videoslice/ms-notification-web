@@ -1,7 +1,13 @@
+import warnings
+
+# Suprimir warnings nos testes
+warnings.filterwarnings("ignore")
+
 import pytest
 from unittest.mock import Mock, patch
 from datetime import datetime
 from requests_aws4auth import AWS4Auth
+
 
 from aws.appsync.appsync_repository import AppSyncNotificationWeb
 from core.dtos.notification_dto import NotificationDto, NotificationContentDto, WebPayloadDto
@@ -26,8 +32,7 @@ class TestAppSyncNotificationWeb:
             content=[NotificationContentDto(
                 web=WebPayloadDto(
                     message="Test notification message",
-                    timestamp=datetime(2026, 2, 9, 10, 30, 0),
-                    is_read=False,
+                    timestamp=datetime(2026, 2, 20, 10, 30, 0),
                     user_id="test-user-id"
                 )
             )],
@@ -35,17 +40,18 @@ class TestAppSyncNotificationWeb:
                 user_id="test-user-id",
                 video_id="test-video-id",
                 file_name="test_video.mp4",
-                extension_file="mp4",
+                file_extension="mp4",
                 status="uploaded",
-                created="2026-02-09T10:00:00Z",
+                created="2026-02-20T10:00:00Z",
                 total_time=10,
                 unit_time="s",
                 start_time=0,
                 end_time=10,
-                time_interval=["0", "1", "2"],
-                max_retry=3,
+                interval_time=["0", "1", "2"],
+                max_retries=3,
                 retries=0,
-                quality="medium",
+                resize="medium",
+                quality_output_level=50,
                 logs=[]
             )
         )
@@ -60,16 +66,14 @@ class TestAppSyncNotificationWeb:
                 NotificationContentDto(
                     web=WebPayloadDto(
                         message="First message",
-                        timestamp=datetime(2026, 2, 9, 10, 0, 0),
-                        is_read=False,
+                        timestamp=datetime(2026, 2, 20, 10, 0, 0),
                         user_id="user-1"
                     )
                 ),
                 NotificationContentDto(
                     web=WebPayloadDto(
                         message="Second message",
-                        timestamp=datetime(2026, 2, 9, 11, 0, 0),
-                        is_read=True,
+                        timestamp=datetime(2026, 2, 20, 11, 0, 0),
                         user_id="user-2"
                     )
                 )
@@ -78,17 +82,18 @@ class TestAppSyncNotificationWeb:
                 user_id="user-1",
                 video_id="video-1",
                 file_name="video.mp4",
-                extension_file="mp4",
+                file_extension="mp4",
                 status="uploaded",
-                created="2026-02-09T10:00:00Z",
+                created="2026-02-20T10:00:00Z",
                 total_time=10,
                 unit_time="s",
                 start_time=0,
                 end_time=10,
-                time_interval=["0", "1", "2"],
-                max_retry=3,
+                interval_time=["0", "1", "2"],
+                max_retries=3,
                 retries=0,
-                quality="medium",
+                resize="medium",
+                quality_output_level=55,
                 logs=[]
             )
         )
@@ -206,10 +211,10 @@ class TestAppSyncNotificationWeb:
         assert variables["input"]["userId"] == "test-user-id"
         assert variables["input"]["videoId"] == "test-video-id"
         assert variables["input"]["fileName"] == "test_video.mp4"
-        assert variables["input"]["extentisonFile"] == "mp4"
+        assert variables["input"]["extensionFile"] == "mp4"
         assert variables["input"]["message"] == "Test notification message"
         assert variables["input"]["isRead"] is False
-        assert variables["input"]["timestamp"] == "2026-02-09T10:30:00Z"
+        assert variables["input"]["timestamp"] == "2026-02-20T10:30:00Z"
 
     def test_set_create_notification_mutation_variables_with_list_content(self, appsync_repository, notification_dto_with_list_content):
         """Testa criação de variáveis quando content é uma lista"""
@@ -220,7 +225,7 @@ class TestAppSyncNotificationWeb:
         assert "input" in variables
         assert variables["input"]["id"] == "test-id-list"
         assert variables["input"]["message"] == "First message"  # Deve pegar o primeiro item
-        assert variables["input"]["timestamp"] == "2026-02-09T10:00:00Z"
+        assert variables["input"]["timestamp"] == "2026-02-20T10:00:00Z"
 
     @patch('aws.appsync.appsync_repository.requests.post')
     @patch('aws.appsync.appsync_repository.boto3.Session')
@@ -287,8 +292,7 @@ class TestAppSyncNotificationWeb:
             content=[NotificationContentDto(
                 web=WebPayloadDto(
                     message="Test",
-                    timestamp=datetime(2026, 1, 13, 0, 0, 0),  # Formato específico das instruções
-                    is_read=False,
+                    timestamp=datetime(2026, 2, 20, 0, 0, 0),  # Formato específico das instruções
                     user_id="user-id"
                 )
             )],
@@ -296,17 +300,18 @@ class TestAppSyncNotificationWeb:
                 user_id="user-id",
                 video_id="video-id",
                 file_name="file.mp4",
-                extension_file="mp4",
+                file_extension="mp4",
                 status="uploaded",
                 created="2026-01-13T00:00:00Z",
                 total_time=10,
                 unit_time="s",
                 start_time=0,
                 end_time=10,
-                time_interval=["0"],
-                max_retry=3,
+                interval_time=["0"],
+                max_retries=3,
                 retries=0,
-                quality="medium",
+                resize="medium",
+                quality_output_level=45,
                 logs=[]
             )
         )
@@ -317,7 +322,7 @@ class TestAppSyncNotificationWeb:
         # Assert
         call_kwargs = mock_post.call_args[1]
         timestamp = call_kwargs['json']['variables']['input']['timestamp']
-        assert timestamp == "2026-01-13T00:00:00Z"
+        assert timestamp == "2026-02-20T00:00:00Z"
 
     @patch('aws.appsync.appsync_repository.requests.post')
     @patch('aws.appsync.appsync_repository.boto3.Session')
@@ -339,9 +344,9 @@ class TestAppSyncNotificationWeb:
 
         # Assert
         call_args = mock_post.call_args
-        assert call_args[0][0] or call_args[1].get('url')  # URL é passada
+        assert call_args[0][0] is not None  # URL é passada
         assert call_args[1]['headers']['Content-Type'] == 'application/json'
-        # verify não é passado explicitamente, então usa o padrão (True)
+        # verify não é passado, usa padrão True
         assert 'verify' not in call_args[1]
 
     def test_set_mutation_variables_handles_single_content_object(self, appsync_repository):
@@ -353,8 +358,7 @@ class TestAppSyncNotificationWeb:
             content=[NotificationContentDto(  # É lista mas com um único elemento
                 web=WebPayloadDto(
                     message="Single message",
-                    timestamp=datetime(2026, 2, 9, 10, 0, 0),
-                    is_read=False,
+                    timestamp=datetime(2026, 2, 20, 10, 0, 0),
                     user_id="user-id"
                 )
             )],
@@ -362,17 +366,18 @@ class TestAppSyncNotificationWeb:
                 user_id="user-id",
                 video_id="video-id",
                 file_name="file.mp4",
-                extension_file="mp4",
+                file_extension="mp4",
                 status="uploaded",
-                created="2026-02-09T10:00:00Z",
+                created="2026-02-20T10:00:00Z",
                 total_time=10,
                 unit_time="s",
                 start_time=0,
                 end_time=10,
-                time_interval=["0"],
-                max_retry=3,
+                interval_time=["0"],
+                max_retries=3,
                 retries=0,
-                quality="medium",
+                resize="medium",
+                quality_output_level=40,
                 logs=[]
             )
         )
@@ -382,4 +387,3 @@ class TestAppSyncNotificationWeb:
 
         # Assert
         assert variables["input"]["message"] == "Single message"
-

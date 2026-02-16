@@ -1,13 +1,11 @@
-import requests
-from requests_aws4auth import AWS4Auth
-import boto3
-
-import os
 import logging
+import os
 
-
-from core.interfaces.notification.notication_interfaces import NotificationDatasourceInterface
+import boto3
+import requests
 from core.dtos.notification_dto import NotificationDto
+from core.interfaces.notification.notication_interfaces import NotificationDatasourceInterface
+from requests_aws4auth import AWS4Auth
 
 appsync_url = os.environ.get('APPSYNC_URL', "https://tcen4z5szzgstgtk6dn2pgbkli.appsync-api.us-east-1.amazonaws.com/graphql")
 region = os.environ.get('AWS_REGION', "us-east-1")
@@ -29,7 +27,7 @@ class AppSyncNotificationWeb(NotificationDatasourceInterface):
                 json={'query': mutation, 'variables': variables},
                 headers={'Content-Type': 'application/json'},
                 auth=auth
-                ,verify=False
+                #,verify=False #Somente para testes locais, remover em produção para garantir segurança
             )
             response.raise_for_status()
             logger.info(f"Notificação web criada com sucesso: {response}")
@@ -50,10 +48,11 @@ class AppSyncNotificationWeb(NotificationDatasourceInterface):
                     userId
                     timestamp
                     message
+                    status
                     isRead
                     videoId
                     fileName
-                    extentisonFile
+                    extensionFile
                 }
             }
         """
@@ -66,9 +65,10 @@ class AppSyncNotificationWeb(NotificationDatasourceInterface):
                 "userId": notification.metadata.user_id,
                 "timestamp": timestamp_formatted,
                 "message": content.web.message,
-                "isRead": content.web.is_read,
+                "status": notification.metadata.status,
+                "isRead": False,
                 "videoId": notification.metadata.video_id,
                 "fileName": notification.metadata.file_name,
-                "extentisonFile": notification.metadata.extension_file
+                "extensionFile": notification.metadata.file_extension
             }
         }
