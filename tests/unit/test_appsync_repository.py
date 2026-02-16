@@ -214,9 +214,9 @@ class TestAppSyncNotificationWeb:
         assert variables["input"]["userId"] == "test-user-id"
         assert variables["input"]["videoId"] == "test-video-id"
         assert variables["input"]["fileName"] == "test_video.mp4"
-        assert variables["input"]["extensionFile"] == "mp4"
+        assert variables["input"]["fileExtension"] == "mp4"
         assert variables["input"]["message"] == "Test notification message"
-        assert variables["input"]["isRead"] is False
+        assert variables["input"]["isRead"] == "false"
         assert variables["input"]["timestamp"] == "2026-02-20T10:30:00Z"
 
     def test_set_create_notification_mutation_variables_with_list_content(self, appsync_repository, notification_dto_with_list_content):

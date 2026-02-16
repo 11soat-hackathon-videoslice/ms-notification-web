@@ -24,9 +24,9 @@ class AppSyncNotificationWeb(NotificationDatasourceInterface):
 
         auth = self._get_auth_appsync()
         mutation = self._get_create_notification_mutation()
-        logger.info(f"mutation: {mutation}")
+        logger.debug(f"mutation: {mutation}")
         variables = self._set_create_notification_mutation_variables(notification)
-        logger.info(f"variables: {variables}")
+        logger.debug(f"variables: {variables}")
 
         try:
             response = requests.post(
