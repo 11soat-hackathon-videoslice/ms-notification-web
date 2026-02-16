@@ -24,9 +24,9 @@ class AppSyncNotificationWeb(NotificationDatasourceInterface):
 
         auth = self._get_auth_appsync()
         mutation = self._get_create_notification_mutation()
-        logger.debug(f"mutation: {mutation}")
+        logger.info(f"mutation: {mutation}")
         variables = self._set_create_notification_mutation_variables(notification)
-        logger.debug(f"variables: {variables}")
+        logger.info(f"variables: {variables}")
 
         try:
             response = requests.post(
@@ -34,7 +34,7 @@ class AppSyncNotificationWeb(NotificationDatasourceInterface):
                 json={'query': mutation, 'variables': variables},
                 headers={'Content-Type': 'application/json'},
                 auth=auth
-                #,verify=False #Somente para testes locais, remover em produção para garantir segurança
+                ,verify=False #Somente para testes locais, remover em produção para garantir segurança
             )
             response.raise_for_status()
             logger.info(f"Notificação web criada com sucesso: {response}")
@@ -59,7 +59,7 @@ class AppSyncNotificationWeb(NotificationDatasourceInterface):
                     isRead
                     videoId
                     fileName
-                    extensionFile
+                    fileExtension
                 }
             }
         """
@@ -73,9 +73,9 @@ class AppSyncNotificationWeb(NotificationDatasourceInterface):
                 "timestamp": timestamp_formatted,
                 "message": content.web.message,
                 "status": notification.metadata.status,
-                "isRead": False,
+                "isRead": "false",
                 "videoId": notification.metadata.video_id,
                 "fileName": notification.metadata.file_name,
-                "extensionFile": notification.metadata.file_extension
+                "fileExtension": notification.metadata.file_extension
             }
         }
