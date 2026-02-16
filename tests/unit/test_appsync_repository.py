@@ -98,6 +98,7 @@ class TestAppSyncNotificationWeb:
             )
         )
 
+    @patch.dict('os.environ', {'APPSYNC_URL': 'https://test-appsync-url.appsync-api.us-east-1.amazonaws.com/graphql'})
     @patch('aws.appsync.appsync_repository.requests.post')
     @patch('aws.appsync.appsync_repository.boto3.Session')
     def test_send_notification_success(self, mock_session, mock_post, appsync_repository, valid_notification_dto):
@@ -133,6 +134,7 @@ class TestAppSyncNotificationWeb:
         assert call_kwargs['json']['variables']['input']['id'] == "test-notification-id"
         assert call_kwargs['json']['variables']['input']['userId'] == "test-user-id"
 
+    @patch.dict('os.environ', {'APPSYNC_URL': 'https://test-appsync-url.appsync-api.us-east-1.amazonaws.com/graphql'})
     @patch('aws.appsync.appsync_repository.requests.post')
     @patch('aws.appsync.appsync_repository.boto3.Session')
     def test_send_notification_http_error(self, mock_session, mock_post, appsync_repository, valid_notification_dto):
@@ -154,6 +156,7 @@ class TestAppSyncNotificationWeb:
             appsync_repository.send(valid_notification_dto)
         assert "HTTP 500 Error" in str(exc_info.value)
 
+    @patch.dict('os.environ', {'APPSYNC_URL': 'https://test-appsync-url.appsync-api.us-east-1.amazonaws.com/graphql'})
     @patch('aws.appsync.appsync_repository.requests.post')
     @patch('aws.appsync.appsync_repository.boto3.Session')
     def test_send_notification_connection_error(self, mock_session, mock_post, appsync_repository, valid_notification_dto):
@@ -227,6 +230,7 @@ class TestAppSyncNotificationWeb:
         assert variables["input"]["message"] == "First message"  # Deve pegar o primeiro item
         assert variables["input"]["timestamp"] == "2026-02-20T10:00:00Z"
 
+    @patch.dict('os.environ', {'APPSYNC_URL': 'https://test-appsync-url.appsync-api.us-east-1.amazonaws.com/graphql'})
     @patch('aws.appsync.appsync_repository.requests.post')
     @patch('aws.appsync.appsync_repository.boto3.Session')
     @patch('aws.appsync.appsync_repository.logger')
@@ -250,6 +254,7 @@ class TestAppSyncNotificationWeb:
         mock_logger.info.assert_called_once()
         assert "Notificação web criada com sucesso" in str(mock_logger.info.call_args)
 
+    @patch.dict('os.environ', {'APPSYNC_URL': 'https://test-appsync-url.appsync-api.us-east-1.amazonaws.com/graphql'})
     @patch('aws.appsync.appsync_repository.requests.post')
     @patch('aws.appsync.appsync_repository.boto3.Session')
     @patch('aws.appsync.appsync_repository.logger')
@@ -271,6 +276,7 @@ class TestAppSyncNotificationWeb:
         mock_logger.error.assert_called_once()
         assert "Erro ao criar notificação web" in str(mock_logger.error.call_args)
 
+    @patch.dict('os.environ', {'APPSYNC_URL': 'https://test-appsync-url.appsync-api.us-east-1.amazonaws.com/graphql'})
     @patch('aws.appsync.appsync_repository.requests.post')
     @patch('aws.appsync.appsync_repository.boto3.Session')
     def test_send_notification_with_different_timestamp_format(self, mock_session, mock_post, appsync_repository):
@@ -324,6 +330,7 @@ class TestAppSyncNotificationWeb:
         timestamp = call_kwargs['json']['variables']['input']['timestamp']
         assert timestamp == "2026-02-20T00:00:00Z"
 
+    @patch.dict('os.environ', {'APPSYNC_URL': 'https://test-appsync-url.appsync-api.us-east-1.amazonaws.com/graphql'})
     @patch('aws.appsync.appsync_repository.requests.post')
     @patch('aws.appsync.appsync_repository.boto3.Session')
     def test_send_notification_uses_correct_url_and_headers(self, mock_session, mock_post, appsync_repository, valid_notification_dto):

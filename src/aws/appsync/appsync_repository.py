@@ -7,7 +7,6 @@ from core.dtos.notification_dto import NotificationDto
 from core.interfaces.notification.notication_interfaces import NotificationDatasourceInterface
 from requests_aws4auth import AWS4Auth
 
-appsync_url = os.environ.get('APPSYNC_URL', "https://tcen4z5szzgstgtk6dn2pgbkli.appsync-api.us-east-1.amazonaws.com/graphql")
 region = os.environ.get('AWS_REGION', "us-east-1")
 
 logging.basicConfig(level=logging.INFO)
@@ -17,9 +16,17 @@ class AppSyncNotificationWeb(NotificationDatasourceInterface):
     """Datasource para envio de notificações web via AppSync"""
 
     def send(self, notification: NotificationDto) -> None:
+        appsync_url = os.environ.get('APPSYNC_URL')
+
+        if appsync_url is None:
+            logger.error("APPSYNC_URL não configurada. Verifique as variáveis de ambiente.")
+            raise ValueError("APPSYNC_URL não configurada. Verifique as variáveis de ambiente.")
+
         auth = self._get_auth_appsync()
         mutation = self._get_create_notification_mutation()
+        logger.debug(f"mutation: {mutation}")
         variables = self._set_create_notification_mutation_variables(notification)
+        logger.debug(f"variables: {variables}")
 
         try:
             response = requests.post(
