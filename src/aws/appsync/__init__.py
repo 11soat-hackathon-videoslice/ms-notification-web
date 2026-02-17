@@ -1,4 +1,5 @@
-from aws.appsync.appsync_repository import AppSyncNotificationWeb
+from . import appsync_repository
 
-__all__ = ['AppSyncNotificationWeb']
+from .appsync_repository import (AppSyncNotificationWeb, logger, region,)
 
+__all__ = ['AppSyncNotificationWeb', 'appsync_repository', 'logger', 'region']
