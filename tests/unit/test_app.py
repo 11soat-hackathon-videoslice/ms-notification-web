@@ -72,7 +72,7 @@ class TestLambdaHandler:
                             "channels": ["EMAIL"],
                             "content": [{
                                 "email": {
-                                    "template": "UPDATE_STATUS",
+                                    "template": "PROCESSING",
                                     "user_id": "test-user"
                                 }
                             }],
@@ -286,7 +286,7 @@ class TestLambdaHandler:
                             "channels": ["WEB"],
                             "content": [{
                                 "email": {
-                                    "template": "UPDATE_STATUS",
+                                    "template": "PROCESSING",
                                     "user_id": "test-user"
                                 }
                             }],
