@@ -56,7 +56,6 @@ sequenceDiagram
     activate AS
     AS  -->> LMB : 200 OK — notificação publicada
     deactivate AS
-    LMB -->> SQS : Mensagem deletada da fila<br/>(processamento concluído)
     deactivate LMB
 
     AS  ->>  WEB : Notificação real-time<br/>(GraphQL Subscription / WebSocket)
