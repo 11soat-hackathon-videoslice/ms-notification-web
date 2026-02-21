@@ -7,7 +7,10 @@ Microserviço AWS Lambda para processamento de notificações web em tempo real.
 
 ## 📋 Visão Geral
 
-O **ms-notification-web** é um microserviço serverless implementado como AWS Lambda Function que processa notificações web em tempo real do sistema VideoSlice. Este serviço consome mensagens de uma fila SQS contendo notificações de eventos do sistema (upload, processamento, conclusão de vídeos) e envia notificações em tempo real para o frontend via AWS AppSync.
+O **ms-notification-web** é um microserviço serverless implementado como AWS Lambda Function que processa notificações web em tempo real do sistema VideoSlice. 
+Este serviço consome mensagens de uma fila SQS contendo notificações de eventos do sistema (upload, processamento, conclusão de vídeos) e envia notificações em tempo real para o frontend via AWS AppSync.
+
+![Exemplo de Notificação Web](doc/vdsc_web_notificações.png)
 
 ### Funcionalidades
 
@@ -30,6 +33,37 @@ O microserviço segue os princípios da **Clean Architecture**, utilizando a bib
 5. **AppSyncNotificationWeb** envia notificação via AppSync GraphQL
 6. **Frontend** recebe notificação em tempo real via subscription
 7. **Response** retorna status de processamento
+
+# Diagrama de Sequência — Notificação Web Real-time para Usuário
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant EB  as vdsc-prd-event-bus<br/>(EventBridge)
+    participant SQS as vdsc-prd-sqs-notification-web<br/>(SQS Queue)
+    participant LMB as vdsc-prd-lmb-notification-web<br/>(Lambda)
+    participant AS  as vdsc-prd-appsync<br/>(AppSync GraphQL)
+    participant WEB as vdsc-prd-web<br/>(Frontend React)
+    participant USR as Usuário
+
+    Note over EB: Notificação web recebida no Event Bus
+
+    EB  ->>  SQS : Direciona evento para a fila<br/>(regra de roteamento EventBridge)
+    SQS ->>  LMB : Trigger Lambda via SQS<br/>(batch de mensagens)
+    activate LMB
+    LMB ->>  AS  : mutation createNotification<br/>(AppSync GraphQL / HTTP POST)
+    activate AS
+    AS  -->> LMB : 200 OK — notificação publicada
+    deactivate AS
+    LMB -->> SQS : Mensagem deletada da fila<br/>(processamento concluído)
+    deactivate LMB
+
+    AS  ->>  WEB : Notificação real-time<br/>(GraphQL Subscription / WebSocket)
+    activate WEB
+    WEB ->>  USR : Exibe notificação na interface
+    deactivate WEB
+```
 
 ## 🚀 Tecnologias
 
