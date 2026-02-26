@@ -5,6 +5,24 @@
 
 Microserviço AWS Lambda para processamento de notificações web em tempo real.
 
+## Índice
+
+- [Visão Geral](#-visão-geral)
+- [Funcionalidades](#funcionalidades)
+- [Arquitetura](#-arquitetura)
+- [Fluxo de Execução](#fluxo-de-execução)
+- [Diagrama de Sequência — Notificação Web Real-time para Usuário](#diagrama-de-sequência--notificação-web-real-time-para-usuário)
+- [Tecnologias](#-tecnologias)
+- [Dependências](#-dependências)
+- [Configuração](#-configuração)
+- [Estrutura de Mensagens](#-estrutura-de-mensagens)
+- [Integração AppSync](#-integração-appsync)
+- [Testes](#-testes)
+- [Deploy](#-deploy)
+- [Integração](#-integração)
+- [Permissões IAM](#-permissões-iam)
+- [Tipos de Notificações](#-tipos-de-notificações)
+
 ## 📋 Visão Geral
 
 O **ms-notification-web** é um microserviço serverless implementado como AWS Lambda Function que processa notificações web em tempo real do sistema VideoSlice. 
